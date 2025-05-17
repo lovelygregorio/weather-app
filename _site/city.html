@@ -1,0 +1,294 @@
+<!-- cityfocus.html for WebDev1_Assignment2
+LovelyGregorio
+Student:W20114829
+for URL parameter link layout
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Whether Weather - City</title>
+
+  <!-- bulma CSS framework for styling -->
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+ <link rel="stylesheet" href="/css/citystyle.css">
+ 
+   <!-- weather data script file -to pull data from js file -->
+
+  <script src="/weather_data.js"></script>
+
+   <!-- navigation bar using njk -->
+
+  <section class="hero is-info is-large">
+  <div class="hero-head">
+    <nav class="navbar">
+      <div class="container is-flex is-align-items-center is-justify-content-space-between">
+        <!-- Logo and Title -->
+        <div class="navbar-item is-flex is-align-items-center">
+          <img src="/images/logo.png" alt="Logo" style="height: 100px; width: auto; margin-right: 10px;">
+          <span class="has-text-weight-bold is-size-4 has-text-warning">(Whether)</span>
+          <span class="has-text-weight-bold is-size-4 ml-2">Weather</span>
+        </div>
+
+        <!-- Nav Links -->
+        <div class="navbar-end">
+          <a href="index.html" class="navbar-item">🏠 Home</a>
+          <a href="dashboard.html" class="navbar-item">📌 Dashboard</a>
+          <a href="settings.html" class="navbar-item">⚙️ Settings</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</section>
+
+
+  
+
+</head>
+<body class="has-background-light">
+
+<script>
+  // helper to get city name from URL 
+  const getCityFromURL = () => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("name");
+  };
+
+  const currentCity = getCityFromURL();
+
+   // wait for full DOM load
+  document.addEventListener("DOMContentLoaded", () => {
+
+    //  show message if city data is missing : error warning
+
+    if (!currentCity || !weatherData[currentCity] || !weatherData[currentCity].daily || !weatherData[currentCity + '_hourly']) {
+      document.body.innerHTML = `
+        <section class="section has-text-centered">
+          <h1 class="title is-3">City Not Found</h1>
+          <p class="subtitle is-6">Please go back to the <a href="dashboard.html">dashboard</a> and choose a valid city.</p>
+        </section>`;
+      return;
+    }
+
+    // fetch daily and hourly weather data
+    const currentCityData = weatherData[currentCity];
+    const today = currentCityData.daily;
+    const hourly = weatherData[currentCity + '_hourly'].hourly;
+
+    // convert weather codes to emojis and description basing the WMO weather interpretaion codes
+    const getWeatherDesc = (code) => {
+      if (code === 0) return "☀️ Clear";
+      if (code === 1) return "🌤️ Mainly Clear";
+      if (code === 2) return "⛅ Partly Cloudy";
+      if (code === 3) return "☁️ Overcast";
+      if (code === 45) return "☁️ Fog";
+      if (code >= 51 && code <= 55) return "🌦️ Drizzle";
+      if (code >= 56 && code <= 59) return "🌦️ Freezing Drizzle";
+      if (code >= 61 && code <= 65) return "🌧️ Rain";
+      if (code >= 66 && code <= 67) return "🌨️ Freezing Rain";
+      if (code >= 71 && code <= 77) return "❄️ Snowfall";
+      if (code >= 80 && code <= 82) return "🌧️ Heavy Rain";
+      if (code >= 85 && code <= 86) return "🌧️ Heavy Snow";
+      if (code >= 95) return "⛈️ Thunderstorm";
+      return "🌫️ Unknown";
+    };
+
+     // match weather codes to appropriate background images
+    const getBackgroundImage = (code) => {
+      if (code === 0) return 'url("/images/lovelysky.jpeg")';
+      if (code === 1) return 'url("/images/lovelysky.jpeg")';
+      if (code === 2) return 'url("/images/partlycloudy.jpeg")';
+      if (code === 3) return 'url("/images/overcast.jpeg")';
+      if (code === 45) return 'url("/images/fog.jpeg")';
+      if (code >= 51 && code <= 55) return 'url("/images/Drizzle.jpeg")';      
+      if (code >= 56 && code <= 59) return 'url("/images/Drizzle.jpeg")';
+      if (code >= 61 && code <= 65) return 'url("/images/rain.jpeg")';
+      if (code >= 66 && code <= 67) return 'url("/images/coldrain.jpeg")';
+      if (code >= 71 && code <= 77) return 'url("/images/snow.jpeg")';
+      if (code >= 80 && code <= 82) return 'url("/images/coldrain.jpeg")';
+      if (code >= 85 && code <= 86) return 'url("/images/snow.jpeg")';
+      if (code >= 95) return 'url("/images/thunderstorm.jpeg")';
+      return 'url("/images/lovelysky.jpeg")';
+    };
+
+      // converts custom date format to real date object
+    function parseCustomDate(input) {
+      const now = new Date();
+      const baseDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const dayOffsetMatch = input.match(/Today(?:\+(\d+))?/);
+      const timeMatch = input.match(/T(\d{2}):(\d{2})/);
+      const dayOffset = dayOffsetMatch && dayOffsetMatch[1] ? parseInt(dayOffsetMatch[1]) : 0;
+      const hours = timeMatch ? parseInt(timeMatch[1]) : 0;
+      const minutes = timeMatch ? parseInt(timeMatch[2]) : 0;
+      const result = new Date(baseDate);
+      result.setDate(baseDate.getDate() + dayOffset);
+      result.setHours(hours, minutes, 0, 0);
+      return result;
+    }
+
+      // set up time and find current hour index in hourly array
+    const now = new Date();
+    const hourStr = now.getHours().toString().padStart(2, '0');
+    const minuteStr = now.getMinutes().toString().padStart(2, '0');
+    const currentHourIndex = hourly.time.findIndex(t => {
+      const match = t.match(/T(\d{2}):/);
+      return match && parseInt(match[1]) === now.getHours();
+    });
+
+       //calculate sunrise and sunset time
+    const sunriseDate = parseCustomDate(today.sunrise[0]);
+    const sunsetDate = parseCustomDate(today.sunset[0]);
+    const nowTime = now.getTime();
+    const isDaytime = nowTime >= sunriseDate.getTime() && nowTime < sunsetDate.getTime();
+
+
+      //set dynamic background based on weather
+    document.body.style.backgroundImage = getBackgroundImage(today.weather_code[0]);
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+
+    document.getElementById("cityName").textContent = currentCity.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+
+    // display current wedather data on page
+    document.getElementById("weatherCode").textContent = getWeatherDesc(hourly.weather_code[currentHourIndex]);
+    document.getElementById("maxTemp").textContent = today.temperature_2m_max[0] + "°C";
+    document.getElementById("maxWind").textContent = today.wind_speed_10m_max[0] + " km/h";
+    document.getElementById("currentHour").textContent = `${hourStr}:${minuteStr}`;
+    document.getElementById("currentTemp").textContent = hourly.temperature_2m[currentHourIndex] + "°C";
+    document.getElementById("currentWind").textContent = hourly.wind_speed_10m[currentHourIndex] + " km/h";
+    document.getElementById("sunriseTime").textContent = sunriseDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    document.getElementById("sunsetTime").textContent = sunsetDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    document.getElementById("feelsLikeTemp").textContent = hourly.apparent_temperature[currentHourIndex] + "°C";
+
+  // populate the 7- day summary table
+    const summaryTable = document.getElementById("dailySummary");
+    for (let i = 0; i < today.time.length; i++) {
+      const raw = today.time[i];
+      let label = raw === "Today" ? "Today" :
+        raw.startsWith("Today+") ? new Date(Date.now() + parseInt(raw.split("+")[1]) * 86400000).toLocaleDateString('en-US', { weekday: 'long' }) : raw;
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${label}</td>
+        <td>${getWeatherDesc(today.weather_code[i])}</td>
+        <td>${today.temperature_2m_max[i]}°C</td>
+        <td>${today.wind_speed_10m_max[i]} km/h</td>
+      `;
+      summaryTable.appendChild(row);
+    }
+
+     // code for hourly forecast rows for next 12 hours
+    const timeRow = document.getElementById("hourlyTimeRow");// time
+    const weatherRow = document.getElementById("weatherRow"); // weather
+    const tempRow = document.getElementById("tempRow");  // temperature
+
+    timeRow.innerHTML = "<th>Time</th>";  
+    weatherRow.innerHTML = "<th>Weather</th>"; 
+    tempRow.innerHTML = "<th>Temperature</th>";  
+
+    let startIndex = currentHourIndex === -1 ? 0 : currentHourIndex; // ensure starting time at current time
+    for (let i = startIndex; i < Math.min(startIndex + 12, hourly.time.length); i++) { // limiting data pull for 12 hrs
+      const match = hourly.time[i].match(/T(\d{2}:\d{2})/);
+      const timeStr = match ? match[1] : "??:??";
+      timeRow.innerHTML += `<th>${timeStr}</th>`;
+      weatherRow.innerHTML += `<td>${getWeatherDesc(hourly.weather_code[i])}</td>`; // pulling hourly weather and temp data basing on time start
+      tempRow.innerHTML += `<td>${hourly.temperature_2m[i]}°C</td>`;
+    }
+  });
+</script>
+
+<!-- weather UI layout using bulma components -->
+<header class="hero-body">
+
+  <div class="container has-text-centered">
+
+    <p class="title is-1" id="cityName"></p>
+    <p class="subtitle is-5">Current Weather Forecast</p>
+    <p class="title is-1 has-text-weight-bold mb-4" style="font-size: 5rem;"><span id="weatherCode"></span></p>
+    <p><strong>🕛 Current Time:</strong> <span id="currentHour"></span></p><br>
+
+    <!-- card style for weather current condiion-->
+    <div class="columns is-mobile is-centered">
+      <div class="column is-narrow m-2">
+        <div class="box has-text-black has-text-centered frosted-glass">
+          <p class="is-size-5 mb-2">📍 <strong>Current Conditions</strong></p>
+          <p>🌡️ <strong>Temp:</strong> <span id="currentTemp"></span></p>
+          <p>💨 <strong>Wind:</strong> <span id="currentWind"></span></p>
+        </div>
+      </div>
+
+       <!-- card style for daily max -->
+      <div class="column is-narrow m-2">
+        <div class="box has-text-black has-text-centered frosted-glass">
+          <p class="is-size-5 mb-2">📈 <strong>Daily Max</strong></p>
+          <p>🌡️ <strong>Max Temp:</strong> <span id="maxTemp"></span></p>
+          <p>💨 <strong>Max Wind:</strong> <span id="maxWind"></span></p>
+        </div>
+      </div>
+
+       <!-- card style for sunrise and sunset-->
+      <div class="column is-narrow m-2">
+        <div class="box has-text-black has-text-centered frosted-glass">
+          <p class="is-size-5 mb-2">🕰️ <strong>Sunrise & Sunset</strong></p>
+          <p>🌅 <strong>Sunrise:</strong> <span id="sunriseTime"></span></p>
+          <p>🌇 <strong>Sunset:</strong> <span id="sunsetTime"></span></p>
+          <p>🧊 <strong>Feels Like:</strong> <span id="feelsLikeTemp"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+
+      <!-- card style for hourly weather forecast -->
+    <div class="card mb-4 frosted-glass">
+      <div class="card-content">
+        <p class="title is-5 has-text-centered">Hourly Forecast ( Next 12 Hours )</p>
+        <table class="table is-striped is-fullwidth is-hoverable">
+          <thead>
+            <tr id="hourlyTimeRow"><th></th></tr>
+          </thead>
+          <tbody>
+            <tr id="weatherRow"></tr>
+            <tr id="tempRow"></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  <!-- card style for 7 day forecast -->
+    <div class="card frosted-glass">
+      <div class="card-content">
+        <p class="title is-5 has-text-centered">🗓️ 7 - Day Forecast</p>
+        <table class="table is-striped is-fullwidth is-hoverable">
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Weather</th>
+              <th>Temperature</th>
+              <th>Wind</th>
+            </tr>
+          </thead>
+          <tbody id="dailySummary"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- footer template -->
+<footer class="footer">
+  <div class="content has-text-centered">
+    <p>
+      <strong> 🌤️ Whether Weather Web App</strong> by <a href="">Lovely Gregorio</a> Created for  SETU Web Development 1 | Assigment 2 |
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

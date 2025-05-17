@@ -1,0 +1,221 @@
+
+<!-- settings.html for WebDev1_Assignment2
+LovelyGregorio
+Student:W20114829
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Whether Weather - Favourites Settings</title>
+  
+  <!-- load Bulma CSS for responsive design and styling -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
+  <!-- custom styles -->
+  <style>
+        
+    body {
+      background-image: url('images/lovelysky.jpeg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-position: center;
+    }
+
+    /* white rounded box with shadow for preferences */
+    .preference-box {
+      background-color: rgba(255, 255, 255, 0.85);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* highlighted cells (e.g. selected preferences) */
+    .highlighted {
+      background-color: #00d1b2;
+      color: white;
+      font-weight: bold;
+    }
+
+    /* table layout and interactive cell styles */
+    table {
+      width: 100%;
+      margin-bottom: 2rem;
+    }
+
+    td {
+      cursor: pointer;
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    td:hover {
+      background-color: #f0f8ff;
+    }
+
+    .section-title {
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+
+<body class="has-background-light">
+
+  <!-- include navigation bar -->
+  <section class="hero is-info is-large">
+  <div class="hero-head">
+    <nav class="navbar">
+      <div class="container is-flex is-align-items-center is-justify-content-space-between">
+        <!-- Logo and Title -->
+        <div class="navbar-item is-flex is-align-items-center">
+          <img src="/images/logo.png" alt="Logo" style="height: 100px; width: auto; margin-right: 10px;">
+          <span class="has-text-weight-bold is-size-4 has-text-warning">(Whether)</span>
+          <span class="has-text-weight-bold is-size-4 ml-2">Weather</span>
+        </div>
+
+        <!-- Nav Links -->
+        <div class="navbar-end">
+          <a href="index.html" class="navbar-item">🏠 Home</a>
+          <a href="dashboard.html" class="navbar-item">📌 Dashboard</a>
+          <a href="settings.html" class="navbar-item">⚙️ Settings</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</section>
+
+
+  <!-- main content section -->
+  <section class="section">
+    <div class="container">
+      <div class="preference-box">
+        <h1 class="title is-3 has-text-centered">🌟 Your Preferences</h1>
+
+        <!-- select favourite cities -->
+        <h2 class="subtitle is-5 section-title"> 🏙️ Double-click to highlight your favourite cities</h2>
+        <table id="citiesTable">
+          <tr>
+            <td data-city="amsterdam">Amsterdam</td>
+            <td data-city="berlin">Berlin</td>
+            <td data-city="copenhagen">Copenhagen</td>
+            <td data-city="new_york">New York</td>
+          </tr>
+          <tr>
+            <td data-city="paris">Paris</td>
+            <td data-city="san_francisco">San Francisco</td>
+            <td data-city="tromso">Tromsø</td>
+            <td data-city="waterford">Waterford</td>
+          </tr>
+        </table>
+
+        <!-- display options (like sunrise/sunset, wind) -->
+        <h2 class="subtitle is-5 section-title">⚙️ Double-click to toggle display options</h2>
+        <table id="optionsTable">
+          <tr>
+            <td data-option="showSun">Show Sunrise & Sunset</td>
+            <td data-option="showWind">Show Max Wind Speed</td>
+          </tr>
+        </table>
+
+        <!-- reset button to clear all selections -->
+        <div class="has-text-centered mt-4">
+          <button class="button is-danger is-light" onclick="resetAllPrefs()"> 🔄 Reset All Preferences </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- updated section only -->
+
+<script>
+  const citiesTable = document.getElementById('citiesTable');
+  const optionsTable = document.getElementById('optionsTable');
+
+  // load saved preferences on page load
+  window.addEventListener('DOMContentLoaded', () => {
+    loadCityPrefs();
+    loadOptionPrefs();
+  });
+
+  // load highlighted cities
+  function loadCityPrefs() {
+    const favCities = JSON.parse(localStorage.getItem('favouriteCities') || '[]');
+    citiesTable.querySelectorAll('td[data-city]').forEach(td => {
+      td.classList.toggle('highlighted', favCities.includes(td.dataset.city));
+    });
+  }
+
+  // prevents false highlights on fresh load
+  function loadOptionPrefs() {
+    const stored = localStorage.getItem('displayOptions');
+    const displayOpts = stored ? JSON.parse(stored) : {};
+
+    optionsTable.querySelectorAll('td[data-option]').forEach(td => {
+      const key = td.dataset.option;
+      const isOn = !!displayOpts[key]; // only highlight if true
+      td.classList.toggle('highlighted', isOn);
+    });
+  }
+
+  // handle double-clicks on city preferences
+  citiesTable.addEventListener('dblclick', (e) => {
+    const td = e.target.closest('td[data-city]');
+    if (td) {
+      td.classList.toggle('highlighted');
+      saveCityPrefs();
+    }
+  });
+
+  // handle double-clicks on display options
+  optionsTable.addEventListener('dblclick', (e) => {
+    const td = e.target.closest('td[data-option]');
+    if (td) {
+      td.classList.toggle('highlighted');
+      saveOptionPrefs();
+    }
+  });
+
+  // save selected cities
+  function saveCityPrefs() {
+    const selected = Array.from(citiesTable.querySelectorAll('td[data-city].highlighted'))
+      .map(td => td.dataset.city);
+    localStorage.setItem('favouriteCities', JSON.stringify(selected));
+  }
+
+  // save selected display options
+  function saveOptionPrefs() {
+    const options = {};
+    optionsTable.querySelectorAll('td[data-option]').forEach(td => {
+      options[td.dataset.option] = td.classList.contains('highlighted');
+    });
+    localStorage.setItem('displayOptions', JSON.stringify(options));
+  }
+
+  //  reset without page reload
+  function resetAllPrefs() {
+    localStorage.removeItem('favouriteCities');
+    localStorage.removeItem('displayOptions');
+
+    citiesTable.querySelectorAll('td[data-city]').forEach(td => td.classList.remove('highlighted'));
+    optionsTable.querySelectorAll('td[data-option]').forEach(td => td.classList.remove('highlighted'));
+
+    alert("🔄 Preferences reset.");
+  }
+</script>
+
+
+  <!-- include footer -->
+  <footer class="footer">
+  <div class="content has-text-centered">
+    <p>
+      <strong> 🌤️ Whether Weather Web App</strong> by <a href="">Lovely Gregorio</a> Created for  SETU Web Development 1 | Assigment 2 |
+    </p>
+  </div>
+</footer>
+</body>
+</html>

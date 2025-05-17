@@ -1,0 +1,196 @@
+---
+permalink: "dashboard.html"
+---
+<!-- dashboard.html for WebDev1_Assignment2
+LovelyGregorio
+Student:W20114829
+-->
+
+
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Whether Weather - Dashboard</title>
+ 
+    <!-- bulma Style -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
+    <!-- weather data script file -to pull data from js file -->
+    <script src="weather_data.js"></script>
+
+      <!-- include the navigation bar using Nunjucks -->
+      {% include "navbar.njk" %}
+
+
+ <!-- additional CSS styling -->
+    <style>
+      body {
+        background-image: url('images/lovelysky.jpeg'); 
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+      }
+
+      /* styling for city weather cards */
+      .city-card {
+        background-color: rgba(188, 229, 253, 0.7); 
+        color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        transition: transform 0.2s ease;
+      }
+
+      /* hover effect to enlarge the card slightly */
+      .city-card:hover {
+        transform: scale(1.03);
+      }
+
+      /* emoji icon for weather status */
+      .weather-icon {
+        font-size: 10rem; 
+        margin-bottom: 0.5rem;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+    </style>
+
+  </head>
+
+  <body class="has-background-light">
+    
+    <!-- Hero  banner sectiorn-->
+    <section class="hero is-info">
+      <div class="hero-body has-text-centered">
+        <h1 class="title is-2">🌤️ Whether Weather Dashboard</h1>
+        <p class="subtitle is-5">Today's Forecast Summary</p>
+      </div>
+    </section>
+
+    <!-- explore cities section -->
+    <section class="section">
+      <div class="container">
+        <h2 class="title is-3 has-text-white has-text-centered mb-5">🌍 Explore City Forecasts</h2>
+
+        <div class="columns is-multiline" id="dashboardCards"></div>
+      </div>
+    </section>
+
+   
+    
+ 
+   <!--  logic to populate dashboard with city cards -->
+<script>
+  //*  use const for fixed values
+  const citiesToShow = [
+    "amsterdam",
+    "berlin",
+    "copenhagen",
+    "new_york",
+    "paris",
+    "san_francisco",
+    "tromso",
+    "waterford"
+  ];
+
+  // load saved preferences from localStorage
+
+  const favouriteCities = JSON.parse(localStorage.getItem('favouriteCities') || '[]');
+  const displayOptions = JSON.parse(localStorage.getItem('displayOptions') || '{}');
+  const showSun = displayOptions.showSun;
+  const showWind = displayOptions.showWind;
+
+  // helper function to extraxt time from custom timestamp
+  const formatTime = (timestamp) => {
+    const match = timestamp.match(/T(\d{2}:\d{2})/);
+    return match ? match[1] : "N/A";
+  };
+
+   // maps weather codes to emoji icons and labels
+  const getWeatherDesc = (code) => {
+    if (code === 0) return "☀️ Clear";
+    if (code === 1) return "🌤️ Mainly Clear";
+    if (code === 2) return "⛅ Partly Cloudy";
+    if (code === 3) return "☁️ Overcast";
+    if (code === 45) return "☁️ Fog";
+    if (code >= 51 && code <= 55) return "🌦️ Drizzle";
+    if (code >= 56 && code <= 59) return "🌦️ Freezing Drizzle";
+    if (code >= 61 && code <= 65) return "🌧️ Rain";
+    if (code >= 66 && code <= 67) return "🌨️ Freezing Rain";
+    if (code >= 71 && code <= 77) return "❄️ Snowfall";
+    if (code >= 80 && code <= 82) return "🌧️ Heavy Rain";
+    if (code >= 85 && code <= 86) return "🌧️ Heavy Snow";
+    if (code >= 95) return "⛈️ Thunderstorm";
+    return "🌫️ Unknown";
+  };
+
+  const dashboard = document.getElementById("dashboardCards");
+
+  //  loop through each city to generate and append a weather card
+  citiesToShow.forEach(city => {
+    const cityData = weatherData[city]; // Object usage
+    if (!cityData) return;
+
+    const daily = cityData.daily;
+
+    const max = daily.temperature_2m_max?.[0] ?? "N/A";
+    const min = daily.temperature_2m_min?.[0] ?? "N/A";
+    const weatherCode = daily.weather_code?.[0] ?? -1;
+    const [icon, ...descParts] = getWeatherDesc(weatherCode).split(" ");
+    const description = descParts.join(" ");
+    const displayName = city.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+
+    const sunrise = formatTime(daily.sunrise?.[0] ?? "");
+    const sunset = formatTime(daily.sunset?.[0] ?? "");
+    const maxWind = daily.wind_speed_10m_max?.[0] ?? "N/A";
+
+    //  object describing display content
+    const forecast = {
+      name: displayName,
+      icon: icon,
+      description: description,
+      maxTemp: max,
+      minTemp: min,
+      sunrise: sunrise,
+      sunset: sunset,
+      windSpeed: maxWind,
+      isFavourite: favouriteCities.includes(city)
+    };
+
+    // let for variables that change - create column element for bulma layout
+    let column = document.createElement("div");
+    column.className = "column is-one-quarter";
+
+    // card HTML structure using template literals
+    column.innerHTML = `
+      <a href="city.html?name=${city}" aria-label="View weather forecast for ${forecast.name}">
+        <div class="card city-card ${forecast.isFavourite ? 'has-background-warning' : ''} has-text-centered">
+          <div class="card-content">
+            <h2 class="title is-3">${forecast.name} ${forecast.isFavourite ? "🌟" : ""}</h2>
+            <div class="weather-icon">${forecast.icon}</div>
+            <p class="subtitle is-4">${forecast.description}</p>
+            <p><strong>🌡️ Max:</strong> ${forecast.maxTemp}°C &nbsp; | &nbsp; <strong>Min:</strong> ${forecast.minTemp}°C</p>
+            <p class="sun-info is-hidden">🌅 Sunrise: <span class="sunrise">${forecast.sunrise}</span> | 🌇 Sunset: <span class="sunset">${forecast.sunset}</span></p>
+            <p class="wind-info is-hidden">💨 Max Wind: <span class="wind-speed">${forecast.windSpeed}</span> km/h</p>
+          </div>
+        </div>
+      </a>
+    `;
+
+    // conditionally show/hide extra info based on user settings
+    if (showSun) column.querySelector(".sun-info").classList.remove("is-hidden");
+    if (showWind) column.querySelector(".wind-info").classList.remove("is-hidden");
+
+ // add the card to the dashboard
+    dashboard.appendChild(column);
+  });
+</script>
+
+<!-- include footer template -->
+    {% include "footer.njk" %}
+  </body>
+  </html>

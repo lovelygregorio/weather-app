@@ -1,0 +1,119 @@
+<!-- Homepage WebDev1_Assignment2
+LovelyGregorio
+Student:W20114829
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- bulma CSS framework for styling -->
+  <title>Whether Weather - Home</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
+  <style>
+    body {
+      background-image: url('images/lovelysky.jpeg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-position: center;
+    }
+  </style>
+</head>
+
+<body class="has-background-light">
+
+  <!-- navbar -->
+  <nav class="navbar is-info" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+         
+        </a>
+      </div>
+   
+       <!-- navbar menu with page links -->
+      <div class="navbar-menu is-active">
+        <div class="navbar-end">
+          <a href="index.html" class="navbar-item has-text-light">🏠 Home</a>
+          <a href="dashboard.html" class="navbar-item has-text-light">📌 Dashboard</a>
+          <a href="settings.html" class="navbar-item has-text-light">⚙️ Settings</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- hero selection with logo and subtitles -->
+  <section class="hero is-small has-text-centered">
+    <div class="hero-body">
+      <div class="container">
+
+            <!-- website logo and title -->
+        <h1 class="title is-1 has-text-light"> <img src="images/logo.png" alt="Logo" style="height: 150px;">  Whether Weather</h1>
+        <p class="subtitle is-4 has-text-light">Check the weather in your favorite city</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- city selector Form -->
+  <section class="section">
+    <div class="container" style="max-width: 500px;">
+      <div class="box">
+        <form id="cityForm">
+
+              <!-- dropdown select for city choices -->
+
+          <div class="field">
+            <label class="label">Select a City</label>
+            <div class="control">
+              <div class="select is-fullwidth">
+                <select id="citySelect" required>
+
+                  <option value="" disabled selected>Choose a city...</option>
+
+                      <!-- city options -->
+                  <option value="amsterdam">Amsterdam</option>
+                  <option value="berlin">Berlin</option>
+                  <option value="copenhagen">Copenhagen</option>
+                  <option value="newyork">New York</option>
+                  <option value="paris">Paris</option>
+                  <option value="sanfrancisco">San Francisco</option>
+                  <option value="tromso">Tromso</option>
+                  <option value="waterford">Waterford</option>
+                  <option value="cork">Cork</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+
+    <!-- submit button to check weather -->
+
+          <div class="field has-text-centered mt-4">
+            <button class="button is-info is-medium" type="submit">🔍 Check Weather</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+     <!-- script to handle form submissin and redirect city page-->
+  <script>
+    document.getElementById('cityForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const city = document.getElementById('citySelect').value;
+      if (city) window.location.href = `${city}.html`;
+    });
+  </script>
+
+  <footer class="footer">
+  <div class="content has-text-centered">
+    <p>
+      <strong> 🌤️ Whether Weather Web App</strong> by <a href="">Lovely Gregorio</a> Created for  SETU Web Development 1 | Assigment 2 |
+    </p>
+  </div>
+</footer>
+</body>
+</html>
