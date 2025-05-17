@@ -20,29 +20,29 @@ Online Deployment: Now live on Netlify https://lovelygwebapp.netlify.app/
 
 Features
 
-Multi-city forecast Amsterdam, Berlin, Paris, Cork, Copenhagen, New York, San Francisco, Waterford, Tromso
-Hourly & Daily Forecasts
-Responsive Bulma layout with background images and frosted-glass weather cards
-User preferences saved using `localStorage`
-Dynamic URL routing based on city name
-Emoji icons for intuitive weather display
-Match weather codes to appropriate background images
+	Multi-city forecast Amsterdam, Berlin, Paris, Cork, Copenhagen, New York, San Francisco, Waterford, Tromso
+	Hourly & Daily Forecasts
+	Responsive Bulma layout with background images and frosted-glass weather cards
+	User preferences saved using `localStorage`
+	Dynamic URL routing based on city name
+	Emoji icons for intuitive weather display
+	Match weather codes to appropriate background images
 
 
 Page Overview
 
 1. index.html - Home Page
 	
-	The landing page wehere users start by choosing a city
+The landing page wehere users start by choosing a city
 
-		Navbar with links to all pages - page directed to a static(routing) page 
-		Hero section with logo and project tagline
-		Dropdown selector to choose city
-		Form redirect to a static city file
+	Navbar with links to all pages - page directed to a static(routing) page 
+	Hero section with logo and project tagline
+	Dropdown selector to choose city
+	Form redirect to a static city file
 
 2. dashboard.html - Weather Dashboard
 	
-	Show weather summaries for all supported cities using responsive styled cards.
+Show weather summaries for all supported cities using responsive styled cards.
 
 	Each card shows temp, wind, and weather icon
 	Uses data sourced from `weather_data.js`
@@ -53,23 +53,23 @@ Page Overview
 
 3. settings.html - Preferences/ Favourites Page
 	
-	Allow users to customize which weather info to display 
+Allow users to customize which weather info to display 
 
-		Choose preferrence in this page highlights their favourites in to the Dashboard
-		Checkboxes to toggle sunrise, sunset, and wind speed
-		Preferences are stored in 'localStorage' for persistent experience
-		A reset button is available to clear all saved preferences
-		Selected preferences are reflected on Dashboard visa visual highlights
+	Choose preferrence in this page highlights their favourites in to the Dashboard
+	Checkboxes to toggle sunrise, sunset, and wind speed
+	Preferences are stored in 'localStorage' for persistent experience
+	A reset button is available to clear all saved preferences
+	Selected preferences are reflected on Dashboard visa visual highlights
 
 4. city.html - City Forecast Focus
 
-	Display a detailed forecast for one selected city
+Display a detailed forecast for one selected city
 
-		Loaded using URL query string (eg. 'city.html?city=paris')
-		Hourly forecast in a table format and 7-day forecast
-		Daily overview with sunrise/sunset and max/min temps
-		Weather condition codes are mapped to emoies for a user-friendly experience
-		Match weather codes to appropriate background images
+	Loaded using URL query string (eg. 'city.html?city=paris')
+	Hourly forecast in a table format and 7-day forecast
+	Daily overview with sunrise/sunset and max/min temps
+	Weather condition codes are mapped to emoies for a user-friendly experience
+	Match weather codes to appropriate background images
 
 
 Tecnhnology Used:
